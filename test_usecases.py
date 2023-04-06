@@ -236,3 +236,6 @@ class TestIntelDevice(unittest.TestCase):
             result = ob.start_search(v)
             self.assertIsNone(result)
 
+
+# inst = TestIntelDevice()
+# inst.test_encode_message()

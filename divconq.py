@@ -50,11 +50,14 @@ class IntelDevice:
         """
 
         encoded_msg = ''
+
         for letter in msg:
-            num_representation = ord(str(letter)) + self.caesar_shift
+            num_representation = int(ord(str(letter))) + int(self.caesar_shift)
             bitstring = '{0:b}'.format(num_representation)
             encoded_msg += str(bitstring)
             encoded_msg += ' '
+        #remove the last space
+        encoded_msg = encoded_msg[:-1]
 
         return encoded_msg
 
@@ -160,17 +163,30 @@ class IntelDevice:
           None if the value does not occur in the subrectangle we are searching over
           A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
         """
-        if x_to >= x_from and y_to >= y_from:
-            if self.loc_grid[x_to][y_to] == value:
-                print("Success!", tuple((x_to, y_to)))
-                return tuple((x_to, y_to))
-            elif self.loc_grid[x_to][y_to] != value:
-                return self.divconq_search(value, x_from, x_to - 1, y_from, y_to -1)
-            else:
-                return None
-          
-        # TODOs
-        raise NotImplementedError()
+        print('griddy', self.loc_grid, 'value', value)
+
+          # Base case: the search range is empty or invalid
+        if x_to < x_from or y_to < y_from:
+            return None
+
+        # Check the value at the middle of the search range
+        x_mid = (x_from + x_to) // 2
+        y_mid = (y_from + y_to) // 2
+        if self.loc_grid[x_mid][y_mid] == value:
+            print('success', (x_mid, y_mid))
+            return (x_mid, y_mid)
+        elif self.loc_grid[x_mid][y_mid] < value:
+            # Recurse on the upper-right and lower-left subranges
+            result = self.divconq_search(value, x_mid + 1, x_to, y_from, y_mid)
+            if result is None:
+                result = self.divconq_search(value, x_from, x_mid, y_mid + 1, y_to)
+            return result
+        else:
+            # Recurse on the upper-left and lower-right subranges
+            result = self.divconq_search(value, x_from, x_mid - 1, y_from, y_mid - 1)
+            if result is None:
+                result = self.divconq_search(value, x_mid, x_to, y_mid, y_to)
+            return result
 
     def start_search(self, value) -> str:
         """
