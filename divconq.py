@@ -55,10 +55,6 @@ class IntelDevice:
             bitstring = '{0:b}'.format(num_representation)
             encoded_msg += str(bitstring)
             encoded_msg += ' '
-            
-
-
-
 
         return encoded_msg
 
@@ -98,10 +94,18 @@ class IntelDevice:
 
         The function does not return anything. It simply fills the self.coordinate_to_location data structure with the right mapping.
         """
-        print(self.coordinate_to_location)
+        decoded_messages = []
+        for message in self.enc_locations:
+            decoded_message = self.decode_message(message)
+            decoded_messages.append(decoded_message)
+        
+        c = 0
+        for j in range(self.height):    
+            for i in range(self.width):
+                self.coordinate_to_location[tuple((j,i))] = decoded_messages[c]
+                c += 1
 
-        # TODO
-        raise NotImplementedError()
+        return
 
     def fill_loc_grid(self):
         """
@@ -115,9 +119,18 @@ class IntelDevice:
 
         The function does not return anything. It simply fills the self.loc_grid data structure with the decoded codes.
         """
+        decoded_codes = []
+        for item in self.enc_codes:
+            decoded_codes.append(self.decode_message(item))
 
-        # TODO
-        raise NotImplementedError()
+
+        c = 0
+        for j in range(self.height):    
+            for i in range(self.width):
+                self.loc_grid[j][i] = decoded_codes[c]
+                c += 1
+
+        return
 
 
     def divconq_search(self, value: int, x_from: int, x_to: int, y_from: int, y_to: int) -> typing.Tuple[int, int]:
@@ -146,9 +159,17 @@ class IntelDevice:
         Returns:
           None if the value does not occur in the subrectangle we are searching over
           A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
-
         """
-        # TODO
+        if x_to >= x_from and y_to >= y_from:
+            if self.loc_grid[x_to][y_to] == value:
+                print("Success!", tuple((x_to, y_to)))
+                return tuple((x_to, y_to))
+            elif self.loc_grid[x_to][y_to] != value:
+                return self.divconq_search(value, x_from, x_to - 1, y_from, y_to -1)
+            else:
+                return None
+          
+        # TODOs
         raise NotImplementedError()
 
     def start_search(self, value) -> str:
