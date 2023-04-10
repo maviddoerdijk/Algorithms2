@@ -165,7 +165,6 @@ class IntelDevice:
           A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
         """
 
-        print(f'xrange [{x_from}-{x_to}] and yrange [{y_from}-{y_to}]')
           # Base case: the search range is empty or invalid
         if x_to <= x_from or y_to <= y_from:
             return None
@@ -175,8 +174,9 @@ class IntelDevice:
         y_mid = (y_from + y_to) // 2 
 
 
-        print(f"gives value {self.loc_grid[y_mid][x_mid]}, while we are searching for {value}")
         if self.loc_grid[y_mid][x_mid] == value:
+            print(self.loc_grid)
+            print(f'success {(y_mid, x_mid)}, {value}')
             return (y_mid, x_mid) # coordinates of packages are (y,x), not (x,y).
         
 
