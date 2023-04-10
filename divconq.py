@@ -165,41 +165,46 @@ class IntelDevice:
           A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
         """
 
+        print(f'xrange [{x_from}-{x_to}] and yrange [{y_from}-{y_to}]')
           # Base case: the search range is empty or invalid
         if x_to <= x_from or y_to <= y_from:
             return None
 
         # Check the value at the middle of the search range
-        x_mid = round((x_from + x_to) // 2 ) # we round down using //, because otherwise the recursive loop could be unstoppable
-        y_mid = round((y_from + y_to) // 2 )
-        if self.loc_grid[x_mid][y_mid] == value:
-            print('success', (x_mid, y_mid))
-            print(self.loc_grid)
-            print(' grid, we searched')
-            print(value, 'value we searched')
-            print(type(self.loc_grid), 'type')
+        x_mid = (x_from + x_to) // 2 # we round down using //, because otherwise the recursive loop could be unstoppable
+        y_mid = (y_from + y_to) // 2 
+
+
+        print(f"gives value {self.loc_grid[y_mid][x_mid]}, while we are searching for {value}")
+        if self.loc_grid[y_mid][x_mid] == value:
             return (y_mid, x_mid) # coordinates of packages are (y,x), not (x,y).
-        elif self.loc_grid[x_mid][y_mid] < value:
-            # Recurse on the upper-right and lower-left subranges
-            result = self.divconq_search(value, x_mid, x_to, y_from, y_to)
-            if result is None:
-                result = self.divconq_search(value, x_from, x_to, y_mid, y_to)
-                print(self.loc_grid[x_mid][y_mid])
-            return result
-        elif self.loc_grid[x_mid][y_mid] > value:
+        
+
+        if value <= self.loc_grid[y_mid][x_mid]:
             result = self.divconq_search(value, x_from, x_mid, y_from, y_to)
-            if result is None:
-                result = self.divconq_search(value, x_from, x_to, y_from, y_mid)
-                print(self.loc_grid[x_mid][y_mid])
-            return result
-        else:
-            # Recurse on the upper-left and lower-right subranges
-            result = self.divconq_search(value, x_from, x_mid - 1, y_from, y_mid - 1)
-            print(result)
-            if result is None:
-                result = self.divconq_search(value, x_mid, x_to, y_mid, y_to)
-                print(result)
-            return result
+            if result is not None:
+                return result
+
+        # Check if the value is in the right half of the search range
+        if value >= self.loc_grid[y_mid][x_mid+1]:
+            result = self.divconq_search(value, x_mid+1, x_to, y_from, y_to)
+            if result is not None:
+                return result
+
+        # Check if the value is in the top half of the search range
+        if value <= self.loc_grid[y_mid][x_mid+1] and value <= self.loc_grid[y_mid-1][x_mid]:
+            result = self.divconq_search(value, x_from, x_to, y_from, y_mid)
+            if result is not None:
+                return result
+        # else:
+        #     # Recurse on the upper-left and lower-right subranges
+        #     print("HELLOO")
+        #     result = self.divconq_search(value, x_from, x_mid - 1, y_from, y_mid - 1)
+        #     print(result)
+        #     if result is None:
+        #         result = self.divconq_search(value, x_mid, x_to, y_mid, y_to)
+        #         print(result)
+        #     return result
 
     def start_search(self, value) -> str:
         """
