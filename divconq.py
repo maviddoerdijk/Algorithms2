@@ -1,5 +1,6 @@
 import numpy as np
 import typing
+import time # to delete later
 
 class IntelDevice:
     def __init__(self, width:int, height:int, enc_locations: typing.List[str], enc_codes:typing.List[str], caesar_shift: int):
@@ -163,29 +164,41 @@ class IntelDevice:
           None if the value does not occur in the subrectangle we are searching over
           A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
         """
-        print('griddy', self.loc_grid, 'value', value)
 
           # Base case: the search range is empty or invalid
-        if x_to < x_from or y_to < y_from:
+        if x_to <= x_from or y_to <= y_from:
             return None
 
         # Check the value at the middle of the search range
-        x_mid = (x_from + x_to) // 2
-        y_mid = (y_from + y_to) // 2
+        x_mid = round((x_from + x_to) // 2 ) # we round down using //, because otherwise the recursive loop could be unstoppable
+        y_mid = round((y_from + y_to) // 2 )
         if self.loc_grid[x_mid][y_mid] == value:
             print('success', (x_mid, y_mid))
-            return (x_mid, y_mid)
+            print(self.loc_grid)
+            print(' grid, we searched')
+            print(value, 'value we searched')
+            print(type(self.loc_grid), 'type')
+            return (y_mid, x_mid) # coordinates of packages are (y,x), not (x,y).
         elif self.loc_grid[x_mid][y_mid] < value:
             # Recurse on the upper-right and lower-left subranges
-            result = self.divconq_search(value, x_mid + 1, x_to, y_from, y_mid)
+            result = self.divconq_search(value, x_mid, x_to, y_from, y_to)
             if result is None:
-                result = self.divconq_search(value, x_from, x_mid, y_mid + 1, y_to)
+                result = self.divconq_search(value, x_from, x_to, y_mid, y_to)
+                print(self.loc_grid[x_mid][y_mid])
+            return result
+        elif self.loc_grid[x_mid][y_mid] > value:
+            result = self.divconq_search(value, x_from, x_mid, y_from, y_to)
+            if result is None:
+                result = self.divconq_search(value, x_from, x_to, y_from, y_mid)
+                print(self.loc_grid[x_mid][y_mid])
             return result
         else:
             # Recurse on the upper-left and lower-right subranges
             result = self.divconq_search(value, x_from, x_mid - 1, y_from, y_mid - 1)
+            print(result)
             if result is None:
                 result = self.divconq_search(value, x_mid, x_to, y_mid, y_to)
+                print(result)
             return result
 
     def start_search(self, value) -> str:
@@ -209,5 +222,7 @@ class IntelDevice:
         if result is None:
             return result
         else:
+            # print(self.coordinate_to_location[result], ' is the location')
+            # print(self.encode_message(self.coordinate_to_location[result]), ' is the encoded location')
             return self.encode_message(self.coordinate_to_location[result])
         
