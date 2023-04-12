@@ -178,37 +178,31 @@ class IntelDevice:
 
 
         if self.loc_grid[y_mid][x_mid] == value:
-            print(self.loc_grid)
-            print(f'success {(y_mid, x_mid)}, {value}')
-            return (y_mid, x_mid) # coordinates of packages are (y,x), not (x,y).
-
+            return (y_mid, x_mid)
+        
+        if self.loc_grid[0][0] == value:
+            return (0,0)
 
         if value < self.loc_grid[y_mid][x_mid]:
-            print('way1')
-            result = self.divconq_search(value, x_from, x_mid, y_from, y_to)
+            result = self.divconq_search(value, x_from, x_mid-1, y_from, y_to)
             if result is not None:
                 return result
 
-        # Check if the value is in the right half of the search range
-        if value > self.loc_grid[y_mid][x_mid+1]:
-            print('way2')
+        if value > self.loc_grid[y_mid][x_mid]:
             result = self.divconq_search(value, x_mid+1, x_to, y_from, y_to)
             if result is not None:
                 return result
 
-        # # Check if the value is in the top half of the search range
-        # if value <= self.loc_grid[y_mid][x_mid+1] and value <= self.loc_grid[y_mid-1][x_mid]:
-        #     print('way3')
-        #     result = self.divconq_search(value, x_from, x_to, y_from, y_mid)
-        #     if result is not None:
-        #         return result
-            
-        
-        if value < self.loc_grid[y_mid][x_mid+1] and value < self.loc_grid[y_from][x_to]:
-            # Search the top half of the search range
-            result = self.divconq_search(value, x_from, x_to, y_from, y_mid)
+        if y_mid < self.height-1 and value < self.loc_grid[y_mid+1][x_mid]:
+            result = self.divconq_search(value, x_from, x_mid-1, y_mid+1, y_to)
             if result is not None:
                 return result
+
+        if y_mid > 0 and value < self.loc_grid[y_mid-1][x_mid]:
+            result = self.divconq_search(value, x_mid+1, x_to, y_from, y_mid-1)
+            if result is not None:
+                return result
+
 
         
 
