@@ -165,8 +165,11 @@ class IntelDevice:
           A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
         """
 
+        print(f"range is x:{x_from, x_to} and y: {y_from, y_to}")
           # Base case: the search range is empty or invalid
         if x_to <= x_from or y_to <= y_from:
+            print(f"range x: {x_from, x_to}, range y:{y_from, y_to}, value is supposed to be {value}.")
+            print(self.loc_grid)
             return None
 
         # Check the value at the middle of the search range
@@ -178,33 +181,36 @@ class IntelDevice:
             print(self.loc_grid)
             print(f'success {(y_mid, x_mid)}, {value}')
             return (y_mid, x_mid) # coordinates of packages are (y,x), not (x,y).
-        
 
-        if value <= self.loc_grid[y_mid][x_mid]:
+
+        if value < self.loc_grid[y_mid][x_mid]:
+            print('way1')
             result = self.divconq_search(value, x_from, x_mid, y_from, y_to)
             if result is not None:
                 return result
 
         # Check if the value is in the right half of the search range
-        if value >= self.loc_grid[y_mid][x_mid+1]:
+        if value > self.loc_grid[y_mid][x_mid+1]:
+            print('way2')
             result = self.divconq_search(value, x_mid+1, x_to, y_from, y_to)
             if result is not None:
                 return result
 
-        # Check if the value is in the top half of the search range
-        if value <= self.loc_grid[y_mid][x_mid+1] and value <= self.loc_grid[y_mid-1][x_mid]:
+        # # Check if the value is in the top half of the search range
+        # if value <= self.loc_grid[y_mid][x_mid+1] and value <= self.loc_grid[y_mid-1][x_mid]:
+        #     print('way3')
+        #     result = self.divconq_search(value, x_from, x_to, y_from, y_mid)
+        #     if result is not None:
+        #         return result
+            
+        
+        if value < self.loc_grid[y_mid][x_mid+1] and value < self.loc_grid[y_from][x_to]:
+            # Search the top half of the search range
             result = self.divconq_search(value, x_from, x_to, y_from, y_mid)
             if result is not None:
                 return result
-        # else:
-        #     # Recurse on the upper-left and lower-right subranges
-        #     print("HELLOO")
-        #     result = self.divconq_search(value, x_from, x_mid - 1, y_from, y_mid - 1)
-        #     print(result)
-        #     if result is None:
-        #         result = self.divconq_search(value, x_mid, x_to, y_mid, y_to)
-        #         print(result)
-        #     return result
+
+        
 
     def start_search(self, value) -> str:
         """
@@ -225,9 +231,11 @@ class IntelDevice:
         result = self.divconq_search(value, x_from=0, x_to=self.loc_grid.shape[1]-1, y_from=0, y_to=self.loc_grid.shape[0]-1)
 
         if result is None:
+            print("finderr, this one has no result")
             return result
         else:
             # print(self.coordinate_to_location[result], ' is the location')
             # print(self.encode_message(self.coordinate_to_location[result]), ' is the encoded location')
+            print(self.encode_message(self.coordinate_to_location[result]), ' is the result!')
             return self.encode_message(self.coordinate_to_location[result])
         
