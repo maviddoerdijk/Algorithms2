@@ -1,49 +1,186 @@
-    def divconq_search(self, value: int, x_from: int, x_to: int, y_from: int, y_to: int) -> typing.Tuple[int, int]:
-        """
-        The divide and conquer search function. The function searches for value in a subset of self.loc_grid.
-        More specifically, we only search in the x-region from x_from up to (and including) x_from and the y-region
-        from y_from up to (and including) y_to. At the initial function call, x_from=0, x_to=self.width-1, y_from=0, y_to=self.height-1 ,
-        meaning that we search over the entire 2d grid self.loc. 
-        This function recursively calls itself on smaller subproblems (subsets/subrectangles of the 2d grid) and combines the solutions
-        to these subproblems in order to find the solution to the complete initial problem.
+import typing
+import unittest
+import numpy as np
 
-        Note: this function should be more efficient than a naive search that iterates over every cell until the value is found. 
-        Thus, make sure design a proper divide and conquer strategy for this. A too simplistic strategy (search over every cell in the grid) 
-        will not lead to a passing grade. Please consult the TAs before handing in the assignment whether your approach is good. 
-
-        :param value: The value that we are searching for in the subrectangle specified by (x_from, x_to, y_from, y_to)
-        :param x_from: The leftmost x coordinate of the subrectangle that we are searching over
-        :param x_to: The rightmost x coordinate of the subrectangle we are searching over
-        :param y_from: The topmost y coordinate of the subrectangle we are searching over
-        :param y_to: The bottom y coordinate of the subrectangle we are searching over
-
-        Note that the following two constraints hold:
-          1. x_from <= x_to
-          2. y_from <= y_to
-
-        Returns:
-          None if the value does not occur in the subrectangle we are searching over
-          A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
-        """
-
-          # Base case: the search range is empty or invalid
-        if x_to <= x_from or y_to <= y_from:
-            return None
-
-        # Check the value at the middle of the search range
-        x_mid = (x_from + x_to) // 2 # we round down using //, because otherwise the recursive loop could be unstoppable
-        y_mid = (y_from + y_to) // 2
+from divconq import IntelDevice
 
 
-        if self.loc_grid[y_mid][x_mid] == value:
-            return (y_mid, x_mid) # coordinates of packages are (y,x), not (x,y).
-        elif self.loc_grid[y_mid][x_mid] < value:
-            result = self.divconq_search(value, x_mid, x_to, y_from, y_to)
-            if result is None:
-                result = self.divconq_search(value, x_from, x_to, y_mid, y_to)
-            return result
-        elif self.loc_grid[y_mid][x_mid] > value:
-            result = self.divconq_search(value, x_from, x_mid, y_from, y_to)
-            if result is None:
-                result = self.divconq_search(value, x_from, x_to, y_from, y_mid)
-            return result
+class TestIntelDevice(unittest.TestCase):
+    def create_arrays(self):    
+
+        self.arr_list = [] # List of nxn arrays self.arr_list[n]
+        for n in range(0, 11):
+            arr = np.zeros((n, n), dtype=int)
+            for i in range(n):
+                for j in range(n):
+                    arr[i, j] = i*n + j + 1
+            self.arr_list.append(arr)
+
+
+    def private_test1(self):
+        a = self.arr_list[3]
+        print(a)
+
+        raw_locations = [f"l{i}" for i in range(12)]
+        raw_codes = [str(x) for x in a.reshape(-1)]
+
+        shift = 2
+
+
+        enc_locations = [
+            "1101110 110010",
+            "1101110 110011",
+            "1101110 110100",
+            "1101110 110101",
+            "1101110 110110",
+            "1101110 110111",
+            "1101110 111000",
+            "1101110 111001",
+            "1101110 111010",
+            "1101110 111011",
+            "1101110 110011 110010",
+            "1101110 110011 110011"
+        ]
+
+        enc_codes = [
+            "110011",
+            "110011 110010",
+            "110101 110010",
+            "110111 110011",
+            "110011 111000",
+            "110100 110010",
+            "110110 110100",
+            "110111 110100",
+            "110101 110100",
+            "110110 111001",
+            "110111 111001",
+            "111010 110010",
+        ]
+
+        solutions = [
+            "1101110 110010",
+            "1101110 110011",
+            "1101110 110100",
+            "1101110 110101",
+            "1101110 110110",
+            "1101110 110111",
+            "1101110 111000",
+            "1101110 111001",
+            "1101110 111010",
+            "1101110 111011",
+            "1101110 110011 110010",
+            "1101110 110011 110011"
+        ]
+
+        ob = IntelDevice(4,3, enc_locations, enc_codes, 2)
+        ob.fill_coordinate_to_loc()
+        ob.fill_loc_grid()
+
+        # values that occur in the 2d grid
+        for vid, v in enumerate(a.reshape(-1)):
+            if v == 20:
+                continue
+            result = ob.start_search(v)
+            self.assertEqual(result, solutions[vid])
+
+        # values that do not occur should lead to None
+        for v in [14,18,19,30]:
+            result = ob.start_search(v)
+            self.assertIsNone(result)
+    
+    def private_test2(self):
+        a = self.arr_list[2]
+
+        enc_locations = ["1101110 110010"]
+
+        enc_codes = ["110011"]
+
+        solutions = [
+            "1101110 110010"]
+        
+        ob = IntelDevice(2,2, enc_locations, enc_codes, 0)
+        ob.fill_coordinate_to_loc()
+        ob.fill_loc_grid()
+
+        for vid, v in enumerate(a.reshape(-1)):
+            if v == 20:
+                continue
+            result = ob.start_search(v)
+            self.assertEqual(result, solutions[vid])
+
+    def print_encoder(self):
+
+        enc_loc = [
+            "1101110 110010",
+            "1101110 110011",
+            "1101110 110100",
+            "1101110 110101",
+            "1101110 110110",
+            "1101110 110111",
+            "1101110 111000",
+            "1101110 111001",
+            "1101110 111010",
+            "1101110 111011",
+            "1101110 110011 110010",
+            "1101110 110011 110011"
+        ]
+
+        enc_code = [
+            "110011",
+            "110011 110010",
+            "110101 110010",
+            "110111 110011",
+            "110011 111000",
+            "110100 110010",
+            "110110 110100",
+            "110111 110100",
+            "110101 110100",
+            "110110 111001",
+            "110111 111001",
+            "111010 110010",
+        ]
+
+        
+        solutions = [
+            "1101110 110010",
+            "1101110 110011",
+            "1101110 110100",
+            "1101110 110101",
+            "1101110 110110",
+            "1101110 110111",
+            "1101110 111000",
+            "1101110 111001",
+            "1101110 111010",
+            "1101110 111011",
+            "1101110 110011 110010",
+            "1101110 110011 110011"
+        ]
+        ob = IntelDevice(5,5, enc_loc, enc_code, 0)
+
+        for string in enc_loc:
+            translation = ob.decode_message(string)
+            print(f"{string} means {translation} a location")
+
+        for string in enc_code:
+            translation = ob.decode_message(string)
+            print(f"{string} means {translation} a code")
+
+        for string in solutions:
+            translation = ob.decode_message(string)
+            print(f"{string} means {translation} a solution")  
+
+        for string in ["l1", "l2", "l3", "l4"]:
+            msg = ob.decode_message(string)
+            print(f'decoded {string} is{msg} ')
+
+
+
+
+# Printing things, by running this file:
+if __name__ == '__main__':
+    t = TestIntelDevice()
+    t.print_encoder()
+    # t.create_arrays()
+    t.create_arrays()
+    # t.private_test1()
+    t.private_test2()

@@ -122,15 +122,15 @@ class TestIntelDevice(unittest.TestCase):
         ]
 
         enc_codes = [
-            "110011",
-            "110011 110010",
-            "110101 110010",
-            "110011 111000",
-            "110100 110010",
-            "110110 110100",
-            "110101 110100",
-            "110110 111001",
-            "110111 111001"
+            "110011",       #3
+            "110011 110010",#32
+            "110101 110010",#52
+            "110011 111000",#73
+            "110100 110010",#38
+            "110110 110100",#42
+            "110101 110100",#64
+            "110110 111001",#74
+            "110111 111001"#54
         ]
 
         solutions = [
@@ -235,7 +235,3 @@ class TestIntelDevice(unittest.TestCase):
         for v in [0,2,14,18,31,48,60]:
             result = ob.start_search(v)
             self.assertIsNone(result)
-
-
-# inst = TestIntelDevice()
-# inst.test_encode_message()

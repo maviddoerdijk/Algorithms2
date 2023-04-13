@@ -109,6 +109,7 @@ class IntelDevice:
                 self.coordinate_to_location[tuple((j,i))] = decoded_messages[c]
                 c += 1
 
+        print(self.coordinate_to_location)
         return
 
     def fill_loc_grid(self):
@@ -165,8 +166,6 @@ class IntelDevice:
           A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
         """
 
-        print(self.loc_grid)
-        print(f"range is x:{x_from, x_to} and y: {y_from, y_to}, looking for {value}")
           # Base case: the search range is empty or invalid
         if x_to < x_from or y_to < y_from:
             return None
@@ -215,11 +214,7 @@ class IntelDevice:
         result = self.divconq_search(value, x_from=0, x_to=self.loc_grid.shape[1]-1, y_from=0, y_to=self.loc_grid.shape[0]-1)
 
         if result is None:
-            print("finderr, this one has no result")
             return result
         else:
-            # print(self.coordinate_to_location[result], ' is the location')
-            # print(self.encode_message(self.coordinate_to_location[result]), ' is the encoded location')
-            print(self.encode_message(self.coordinate_to_location[result]), ' is the result!')
             return self.encode_message(self.coordinate_to_location[result])
         
