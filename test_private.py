@@ -88,11 +88,13 @@ class TestIntelDevice(unittest.TestCase):
             result = ob.start_search(v)
             self.assertIsNone(result)
     
-    def private_test2(self):
+    def small_matrix(self):
         a = self.arr_list[2]
 
-        enc_locations = ["1101110 110010"]
-
+        enc_locations = ['1101100 110001', #l1
+                         '1101100 110010', #l2
+                         '1101100 110011', #l3
+                         '1101100 110100'] #l4
         enc_codes = ["110011"]
 
         solutions = [
@@ -168,10 +170,11 @@ class TestIntelDevice(unittest.TestCase):
         for string in solutions:
             translation = ob.decode_message(string)
             print(f"{string} means {translation} a solution")  
-
+        
+        davidstring = []
         for string in ["l1", "l2", "l3", "l4"]:
-            msg = ob.decode_message(string)
-            print(f'decoded {string} is{msg} ')
+            msg = ob.encode_message(string)
+            davidstring.append(msg)
 
 
 
