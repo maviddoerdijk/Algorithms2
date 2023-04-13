@@ -178,30 +178,40 @@ class IntelDevice:
 
 
         if self.loc_grid[y_mid][x_mid] == value:
+            print('success')
             return (y_mid, x_mid)
         
         if self.loc_grid[0][0] == value:
             return (0,0)
 
         if value < self.loc_grid[y_mid][x_mid]:
-            result = self.divconq_search(value, x_from, x_mid-1, y_from, y_to)
+            # Search lower subrectangle only if value is not less than minimum value in current subrectangle
+            result = self.divconq_search(value, x_from, x_to, y_from, y_mid-1)
+            if result is not None:
+                return result
+
+            result = self.divconq_search(value, x_from, x_mid-1, y_mid, y_to)
+            if result is not None:
+                return result
+        
+        if value < self.loc_grid[y_mid][x_mid]:
+            result = self.divconq_search(value, x_from, x_mid-1, y_mid+1, y_to)
+            if result is not None:
+                return result
+        else:
+            result = self.divconq_search(value, x_mid+1, x_to, y_mid+1, y_to)
             if result is not None:
                 return result
 
         if value > self.loc_grid[y_mid][x_mid]:
-            result = self.divconq_search(value, x_mid+1, x_to, y_from, y_to)
+            result = self.divconq_search(value, x_mid+1, x_to, y_from, y_mid)
             if result is not None:
                 return result
 
-        if y_mid < self.height-1 and value < self.loc_grid[y_mid+1][x_mid]:
-            result = self.divconq_search(value, x_from, x_mid-1, y_mid+1, y_to)
+            result = self.divconq_search(value, x_from, x_mid, y_mid+1, y_to)
             if result is not None:
                 return result
-
-        if y_mid > 0 and value < self.loc_grid[y_mid-1][x_mid]:
-            result = self.divconq_search(value, x_mid+1, x_to, y_from, y_mid-1)
-            if result is not None:
-                return result
+        
 
 
         
