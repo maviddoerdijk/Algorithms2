@@ -108,8 +108,6 @@ class IntelDevice:
             for i in range(self.width):
                 self.coordinate_to_location[tuple((j,i))] = decoded_messages[c]
                 c += 1
-
-        print(self.coordinate_to_location)
         return
 
     def fill_loc_grid(self):
@@ -124,11 +122,13 @@ class IntelDevice:
 
         The function does not return anything. It simply fills the self.loc_grid data structure with the decoded codes.
         """
+
+        #First, decode all the codes, and put them in a list in order
         decoded_codes = []
         for item in self.enc_codes:
             decoded_codes.append(self.decode_message(item))
 
-
+        #Then, use the standard order for the matrices (0,0), (0,1), (0,2), (1,2), etc.
         c = 0
         for j in range(self.height):    
             for i in range(self.width):
@@ -136,6 +136,7 @@ class IntelDevice:
                 c += 1
 
         return
+        
 
 
     def divconq_search(self, value: int, x_from: int, x_to: int, y_from: int, y_to: int) -> typing.Tuple[int, int]:
@@ -166,21 +167,21 @@ class IntelDevice:
           A tuple (y,x) specifying the location where the value was found (if the value occurs in the subrectangle)
         """
 
-          # Base case: the search range is empty or invalid
+        # Base case for recursive function - subrange would be invalid under these conditions
         if x_to < x_from or y_to < y_from:
             return None
 
         # Check the value at the middle of the search range
-        x_mid = (x_from + x_to) // 2 # we round down using //, because otherwise the recursive loop could be unstoppable
-        y_mid = (y_from + y_to) // 2 
+        x_mid = round((x_from + x_to - 0.1) / 2) # we round down the mid values down
+        y_mid = round((y_from + y_to - 0.1) / 2) 
 
 
+        # The case where the correct value is found
         if self.loc_grid[y_mid][x_mid] == value:
             return (y_mid, x_mid)
     
 
         elif self.loc_grid[y_mid][x_mid] > value:
-            # If the current value (mid value) 
             result = self.divconq_search(value, x_from, x_mid - 1, y_from, y_to)
             if result is None:
                 result = self.divconq_search(value, x_mid, x_to, y_from, y_mid - 1)
@@ -191,9 +192,7 @@ class IntelDevice:
                 result = self.divconq_search(value, x_mid + 1, x_to, y_from, y_to)
             return result
         
-
-
-        
+       
 
     def start_search(self, value) -> str:
         """
@@ -208,13 +207,11 @@ class IntelDevice:
           The encoded location of where the value was found. Note that the location is not the (y,x) tuple but the
           corresponding name of the location (encoded with self.encode_message). 
         """
-
-        # process raw locations with caesar shift, 
-        # construct the loc_grid and start the search
         result = self.divconq_search(value, x_from=0, x_to=self.loc_grid.shape[1]-1, y_from=0, y_to=self.loc_grid.shape[0]-1)
 
         if result is None:
             return result
         else:
             return self.encode_message(self.coordinate_to_location[result])
+
         
